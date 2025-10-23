@@ -13,18 +13,23 @@ const LoginPopup = ({ setShowLogin }) => {
     email: "test@gmail.com",
     password: "123456789"
   });
-  const [loading, setLoading] = useState(false); // for button state
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(""); // For displaying error messages
 
   const onChangeHandler = (event) => {
     const { name, value } = event.target;
     setData(prev => ({ ...prev, [name]: value }));
+    setError(""); // Clear error on input change
   };
 
   const onLogin = async (event) => {
     event.preventDefault();
+    console.log("Login clicked", data); // 🔹 Debug log
     setLoading(true);
+    setError("");
+
     try {
-      let endpoint = currState === "Login" ? "/api/user/login" : "/api/user/register";
+      const endpoint = currState === "Login" ? "/api/user/login" : "/api/user/register";
       const response = await axios.post(`${url}${endpoint}`, data);
 
       if (response.data.success) {
@@ -32,11 +37,11 @@ const LoginPopup = ({ setShowLogin }) => {
         localStorage.setItem("token", response.data.token);
         setShowLogin(false);
       } else {
-        alert(response.data.message);
+        setError(response.data.message || "Something went wrong.");
       }
     } catch (err) {
       console.error("Login error:", err);
-      alert("Something went wrong. Check console for details.");
+      setError("Login failed. Check console for details.");
     } finally {
       setLoading(false);
     }
@@ -77,6 +82,7 @@ const LoginPopup = ({ setShowLogin }) => {
             onChange={onChangeHandler}
             required
           />
+          {error && <p className="login-error">{error}</p>}
         </div>
 
         <div className="login-popup-condition">
@@ -101,5 +107,6 @@ const LoginPopup = ({ setShowLogin }) => {
 };
 
 export default LoginPopup;
+
 
 
